@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@js-draw/material-icons": "^1.28.0",
+    "js-draw": "^1.28.0"
+  },
+  "devDependencies": {
+    "sass-embedded": "^1.85.1"
+  }
+}
