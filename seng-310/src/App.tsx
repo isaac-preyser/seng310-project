@@ -36,6 +36,24 @@ function App() {
     }
   };
 
+  const saveCanvas = () => {
+    if (editor) {
+      const svgElement = editor.toSVG();
+      const data = new XMLSerializer().serializeToString(svgElement);
+      // start a download of the SVG data
+      const blob = new Blob([data], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'signature.svg';
+      a.click();
+      URL.revokeObjectURL(url);
+
+
+    }
+  };
+
+
   return (
     <>
       <h1>Welcome, {user}!</h1>
@@ -43,7 +61,7 @@ function App() {
       <div ref={editorContainerRef} style={{ width: '100%', height: '100%' }} />
       <div id="button container">
         <button onClick={clearCanvas}>Clear</button>
-        <button>Save</button>
+        <button onClick={saveCanvas}>Save</button>
 
       </div>
       
