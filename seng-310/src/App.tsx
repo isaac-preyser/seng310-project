@@ -3,14 +3,15 @@ import './App.css';
 import Editor, { BackgroundComponentBackgroundType, Color4, Erase } from 'js-draw';
 import { MaterialIconProvider } from '@js-draw/material-icons';
 import 'js-draw/bundledStyles';
-
-
+import ImageUploader from './ImageUploader'; // Import the ImageUploader component
 
 
 function App() {
   const user = 'User';
   const editorContainerRef = useRef<HTMLDivElement | null>(null);
   const [editor, setEditor] = useState<Editor | null>(null);
+  const [showImageUploader, setShowImageUploader] = useState(false); // State to toggle ImageUploader
+
 
   useEffect(() => {
     if (editorContainerRef.current) {
@@ -53,6 +54,10 @@ function App() {
     }
   };
 
+  const showUploader = () => {
+    setShowImageUploader(true);
+  };
+
 
   return (
     <>
@@ -62,7 +67,8 @@ function App() {
       <div id="button container">
         <button onClick={clearCanvas}>Clear</button>
         <button onClick={saveCanvas}>Save</button>
-
+        <button onClick={showUploader}>Upload Image</button>
+        {showImageUploader && <ImageUploader />}
       </div>
       
       
