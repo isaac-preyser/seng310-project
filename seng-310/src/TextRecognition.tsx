@@ -1,25 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import Tesseract from 'tesseract.js';
+
 interface TextRecognitionProps {
-  selectedImage: string;
+  imageFile: File;
 }
 
-const TextRecognition: React.FC<TextRecognitionProps> = ({ selectedImage }) => {
+const TextRecognition: React.FC<TextRecognitionProps> = ({ imageFile }) => {
   const [recognizedText, setRecognizedText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     const recognizeText = async () => {
-      if (selectedImage) {
-        const result = await Tesseract.recognize(selectedImage);
+      if (imageFile) {
+        setIsLoading(true);
+        const result = await Tesseract.recognize(imageFile);
         setRecognizedText(result.data.text);
+        setIsLoading(false);
       }
     };
     recognizeText();
-  }, [selectedImage]);
+  }, [imageFile]);
+
   return (
     <div>
       <h2>Recognized Text:</h2>
-      <p>{recognizedText}</p>
+      {isLoading ? <p>Processing...</p> : <p>{recognizedText}</p>}
     </div>
   );
 };
+
 export default TextRecognition;

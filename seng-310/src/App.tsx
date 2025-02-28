@@ -41,14 +41,30 @@ function App() {
     if (editor) {
       const svgElement = editor.toSVG();
       const data = new XMLSerializer().serializeToString(svgElement);
-      // start a download of the SVG data
-      const blob = new Blob([data], { type: 'image/svg+xml' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'signature.svg';
-      a.click();
-      URL.revokeObjectURL(url);
+      const svgBlob = new Blob([data], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(svgBlob);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0);
+          canvas.toBlob((blob) => {
+        if (blob) {
+          const pngUrl = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = pngUrl;
+          a.download = 'signature.png';
+          a.click();
+          URL.revokeObjectURL(pngUrl);
+        }
+          }, 'image/png');
+        }
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
 
 
     }
