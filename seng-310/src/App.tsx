@@ -4,14 +4,15 @@ import Editor, { BackgroundComponentBackgroundType, Color4, Erase } from 'js-dra
 import { MaterialIconProvider } from '@js-draw/material-icons';
 import 'js-draw/bundledStyles';
 import ImageUploader from './ImageUploader'; // Import the ImageUploader component
-
+import Tesseract from 'tesseract.js'; // Import Tesseract.js
 
 function App() {
-  const user = 'User';
+  const [user, setUser] = useState('User'); // State to store the username
+  const [guestList, setGuestList] = useState<string[]>([]); // State to store the guest list
   const editorContainerRef = useRef<HTMLDivElement | null>(null);
   const [editor, setEditor] = useState<Editor | null>(null);
   const [showImageUploader, setShowImageUploader] = useState(false); // State to toggle ImageUploader
-
+  const [ocrResult, setOcrResult] = useState<string | null>(null); // State to store OCR result
 
   useEffect(() => {
     if (editorContainerRef.current) {
@@ -52,28 +53,36 @@ function App() {
         if (ctx) {
           ctx.drawImage(img, 0, 0);
           canvas.toBlob((blob) => {
-        if (blob) {
-          const pngUrl = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = pngUrl;
-          a.download = 'signature.png';
-          a.click();
-          URL.revokeObjectURL(pngUrl);
-        }
+            if (blob) {
+              // Perform OCR on the created PNG blob
+              Tesseract.recognize(blob, 'eng')
+                .then(({ data: { text } }) => {
+                  const trimmedText = text.trim(); // Strip the newline from the OCR result
+                  setOcrResult(trimmedText); // Store the OCR result in state
+                  console.log('OCR Result:', trimmedText);
+                  setUser(trimmedText); // Update the username with the OCR result
+
+                  // Ask the user if they want to add their name to the guest list
+                  if (window.confirm(`Hi ${trimmedText}! would you like to add your name to the guest list for networking purposes?`)) {
+                    setGuestList((prevGuestList) => [...prevGuestList, trimmedText]);
+                    setUser('User'); // Reset the username to 'User'
+                  }
+                })
+                .catch((error) => {
+                  console.error('OCR Error:', error);
+                });
+            }
           }, 'image/png');
         }
         URL.revokeObjectURL(url);
       };
       img.src = url;
-
-
     }
   };
 
   const showUploader = () => {
     setShowImageUploader(true);
   };
-
 
   return (
     <>
@@ -82,12 +91,18 @@ function App() {
       <div ref={editorContainerRef} style={{ width: '100%', height: '100%' }} />
       <div id="button container">
         <button onClick={clearCanvas}>Clear</button>
-        <button onClick={saveCanvas}>Save</button>
-        <button onClick={showUploader}>Upload Image</button>
-        {showImageUploader && <ImageUploader />}
+        <button onClick={saveCanvas}>Submit</button>
       </div>
-      
-      
+      {guestList.length > 0 && (
+        <div>
+          <h2>Guest List:</h2>
+          <ul>
+            {guestList.map((guest, index) => (
+              <li key={index}>{guest}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </>
   );
 }
